@@ -1,0 +1,24 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "title": "Spaghetti à Bolonhesa",
+      "description": "Massa com molho de carne e tomates."
+    },
+    {
+      "id": 2,
+      "title": "Salada Mediterrânea",
+      "description": "Folhas, pepino, tomate e queijo."
+    },
+    {
+      "id": 3,
+      "title": "bolo de whey",
+      "description": "Usar uma colher ..."
+    },
+    {
+      "id": 4,
+      "title": "Torta de bolacha",
+      "description": "bolacha maria"
+    }
+  ]
+}
