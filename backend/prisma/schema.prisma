@@ -13,12 +13,112 @@ datasource db {
   provider = "postgresql"
 }
 
-model Recipe {
-    id          Int      @id @default(autoincrement())
-    title       String
-    description String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+enum Role {
+  USER
+  ADMIN
 
-    @@index([createdAt])
+  @@map("role")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  YOUTUBE
+
+  @@map("media_type")
+}
+
+model User {
+  id           String                @id(map: "user_pkey") @default(cuid())
+  name         String
+  email        String                @unique(map: "user_email_key")
+  passwordHash String                @map("password_hash")
+  role         Role                  @default(USER)
+  recipes      Recipe[]
+  favorites    Favorite[]
+  resetTokens  PasswordResetToken[]
+  createdAt    DateTime              @default(now()) @map("created_at")
+  updatedAt    DateTime              @updatedAt @map("updated_at")
+
+  @@index([createdAt], map: "user_created_at_idx")
+  @@map("user")
+}
+
+model PasswordResetToken {
+  id        String    @id(map: "password_reset_token_pkey") @default(cuid())
+  tokenHash String    @unique(map: "password_reset_token_token_hash_key") @map("token_hash")
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, map: "password_reset_token_user_id_fkey")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId], map: "password_reset_token_user_id_idx")
+  @@map("password_reset_token")
+}
+
+model Category {
+  id         Int              @id(map: "category_pkey") @default(autoincrement())
+  name       String           @unique(map: "category_name_key")
+  recipes    RecipeCategory[]
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  @@map("category")
+}
+
+model Recipe {
+  id           Int              @id(map: "recipe_pkey") @default(autoincrement())
+  title        String
+  ingredients  String[]
+  instructions String
+  authorId     String?          @map("author_id")
+  author       User?            @relation(fields: [authorId], references: [id], onDelete: SetNull, map: "recipe_author_id_fkey")
+  categories   RecipeCategory[]
+  media        Media[]
+  favorites    Favorite[]
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  @@index([authorId], map: "recipe_author_id_idx")
+  @@index([createdAt], map: "recipe_created_at_idx")
+  @@map("recipe")
+}
+
+model RecipeCategory {
+  recipeId   Int      @map("recipe_id")
+  categoryId Int      @map("category_id")
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade, map: "recipe_category_recipe_id_fkey")
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, map: "recipe_category_category_id_fkey")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@id([recipeId, categoryId], map: "recipe_category_pkey")
+  @@index([categoryId], map: "recipe_category_category_id_idx")
+  @@map("recipe_category")
+}
+
+model Media {
+  id        Int       @id(map: "media_pkey") @default(autoincrement())
+  url       String
+  publicId  String    @map("public_id")
+  type      MediaType
+  isPrimary Boolean   @default(false) @map("is_primary")
+  recipeId  Int       @map("recipe_id")
+  recipe    Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade, map: "media_recipe_id_fkey")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([recipeId], map: "media_recipe_id_idx")
+  @@map("media")
+}
+
+model Favorite {
+  id        Int      @id(map: "favorite_pkey") @default(autoincrement())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "favorite_user_id_fkey")
+  recipeId  Int      @map("recipe_id")
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade, map: "favorite_recipe_id_fkey")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, recipeId], map: "favorite_user_id_recipe_id_key")
+  @@index([recipeId], map: "favorite_recipe_id_idx")
+  @@map("favorite")
 }
