@@ -55,6 +55,7 @@ export function RecipeBoard({ publicApiUrl }: { publicApiUrl: string }) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
   const [editing, setEditing] = useState<Recipe | null>(null);
@@ -73,7 +74,8 @@ export function RecipeBoard({ publicApiUrl }: { publicApiUrl: string }) {
     fetch("/api/auth/me", { cache: "no-store" })
       .then(async (response) => (response.ok ? ((await response.json()) as User) : null))
       .then(setUser)
-      .catch(() => setUser(null));
+      .catch(() => setUser(null))
+      .finally(() => setAuthChecked(true));
   }, []);
 
   useEffect(() => {
@@ -441,6 +443,10 @@ export function RecipeBoard({ publicApiUrl }: { publicApiUrl: string }) {
     setMessage("Sessão encerrada.");
   }
 
+  if (!authChecked) {
+    return <main className="authPage" />;
+  }
+
   return (
     <main className={user ? undefined : "authPage"}>
       {!user && (
@@ -475,7 +481,12 @@ export function RecipeBoard({ publicApiUrl }: { publicApiUrl: string }) {
               <span className="eyebrow">Sessão ativa</span>
               <div><strong>{user.name}</strong> <span className="muted">{user.email}</span></div>
             </div>
-            <button className="secondary" type="button" onClick={logout}>Sair</button>
+            <div className="topBarActions">
+              {user.role === "ADMIN" && (
+                <Link className="linkButton" href="/categorias">Gerenciar categorias</Link>
+              )}
+              <button className="secondary" type="button" onClick={logout}>Sair</button>
+            </div>
           </div>
 
           <section className="recipes" aria-live="polite">
@@ -527,10 +538,6 @@ export function RecipeBoard({ publicApiUrl }: { publicApiUrl: string }) {
                   ))}
                 </div>
               </div>
-            )}
-
-            {user.role === "ADMIN" && (
-              <Link className="linkButton" href="/categorias">Gerenciar categorias</Link>
             )}
 
             <div className="recipeGrid">

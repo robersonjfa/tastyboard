@@ -68,6 +68,8 @@ main.authPage .panel { width: 100%; }
 .topBar .eyebrow { display: block; color: var(--accent-dark); margin-bottom: 2px; }
 .topBar strong { font-size: 1.05rem; }
 .topBar .muted { color: var(--muted); font-size: 0.85rem; overflow-wrap: anywhere; }
+.topBarActions { display: flex; align-items: center; gap: 16px; }
+.topBarActions .linkButton { font-weight: 600; }
 
 input, textarea, select, button { min-height: 44px; padding: 11px 13px; border-radius: 10px; }
 input, textarea, select { width: 100%; color: var(--ink); border: 1px solid #d8c5ba; background: #fffdfb; }
