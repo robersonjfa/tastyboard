@@ -9,6 +9,7 @@ export class PrismaService extends PrismaClient implements OnModuleDestroy {
     const adapter = new PrismaPg({
       connectionString: env.DATABASE_URL,
       max: env.NODE_ENV === 'production' ? 1 : 10,
+      ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
     });
     super({ adapter });
   }
